@@ -19,7 +19,7 @@ HTML/CSS (if applicable)
 
 🚀 How to Run
 
-git clone https://github.com/yourusername/heart-attack-prediction.git
+git clone https://github.com/yuvi-codes/heart-attack-prediction.git
 cd heart-attack-prediction
 pip install -r requirements.txt
 python app.py  # or: streamlit run app.py
