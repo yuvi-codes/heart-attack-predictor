@@ -1,90 +1,81 @@
 import streamlit as st
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
 
-st.set_page_config(page_title="Heart Attack Risk Predictor", layout="centered")
-
-st.title("❤️ Heart Attack Risk Predictor")
-st.write("Enter your health details to estimate the percentage chance of a heart attack.")
-
-# Load and preprocess the dataset
+# Load and preprocess data
 @st.cache_data
 def load_and_train_model():
     df = pd.read_csv("heart.csv")
-
-    # Encode categorical features
-    df['Diabetes'] = df['Diabetes'].map({True: 1, False: 0})
-    df['Smoking'] = df['Smoking'].map({True: 1, False: 0})
-    df['AlcoholDrinking'] = df['AlcoholDrinking'].map({True: 1, False: 0})
-    df['Stroke'] = df['Stroke'].map({True: 1, False: 0})
-    df['Sex'] = df['Sex'].map({'Male': 1, 'Female': 0})
-    df['PhysicalActivity'] = df['PhysicalActivity'].map({True: 1, False: 0})
-    df['DiffWalking'] = df['DiffWalking'].map({True: 1, False: 0})
-    df['Asthma'] = df['Asthma'].map({True: 1, False: 0})
-    df['KidneyDisease'] = df['KidneyDisease'].map({True: 1, False: 0})
-    df['SkinCancer'] = df['SkinCancer'].map({True: 1, False: 0})
-
-    X = df.drop('HeartDisease', axis=1)
-    y = df['HeartDisease']
-
+    
+    X = df.drop("target", axis=1)
+    y = df["target"]
+    
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_scaled, y)
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-    return model, scaler
+    rf = RandomForestClassifier(random_state=42)
+    rf.fit(X_train, y_train)
 
-model, scaler = load_and_train_model()
+    svm = SVC(probability=True, random_state=42)
+    svm.fit(X_train, y_train)
 
-# Collect user input
-st.header("📝 Your Health Info")
+    return rf, svm, scaler
 
-age = st.slider("Age", 18, 100, 30)
-bmi = st.slider("BMI", 10.0, 50.0, 22.0)
-physical_health = st.slider("Physical Health (0–30 days)", 0, 30, 0)
-mental_health = st.slider("Mental Health (0–30 days)", 0, 30, 0)
-sleep_time = st.slider("Average Sleep Time (hrs)", 1, 24, 7)
+# Load models
+rf_model, svm_model, scaler = load_and_train_model()
 
-sex = st.radio("Sex", ["Male", "Female"])
-diabetes = st.radio("Diabetes", ["Yes", "No"])
-smoking = st.radio("Smoking", ["Yes", "No"])
-alcohol = st.radio("Alcohol Drinking", ["Yes", "No"])
-stroke = st.radio("Ever had a Stroke", ["Yes", "No"])
-physical_activity = st.radio("Physically Active", ["Yes", "No"])
-diff_walking = st.radio("Difficulty Walking", ["Yes", "No"])
-asthma = st.radio("Asthma", ["Yes", "No"])
-kidney = st.radio("Kidney Disease", ["Yes", "No"])
-skin_cancer = st.radio("Skin Cancer", ["Yes", "No"])
+# Streamlit UI
+st.title("Heart Attack Risk Predictor 💓")
+st.write("Enter your details below to check your heart attack risk percentage.")
 
-# Convert inputs to numerical form
-input_data = np.array([[
-    1 if diabetes == "Yes" else 0,
-    1 if smoking == "Yes" else 0,
-    1 if alcohol == "Yes" else 0,
-    1 if stroke == "Yes" else 0,
-    1 if sex == "Male" else 0,
+# User Inputs
+age = st.slider("Age", 20, 80, 45)
+sex = st.selectbox("Sex", ["Male", "Female"])
+cp = st.selectbox("Chest Pain Type (cp)", [0, 1, 2, 3])
+trestbps = st.slider("Resting Blood Pressure (trestbps)", 80, 200, 120)
+chol = st.slider("Serum Cholesterol (chol)", 100, 600, 200)
+fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl (fbs)", ["Yes", "No"])
+restecg = st.selectbox("Resting ECG (restecg)", [0, 1, 2])
+thalach = st.slider("Maximum Heart Rate Achieved (thalach)", 60, 202, 150)
+exang = st.selectbox("Exercise Induced Angina (exang)", ["Yes", "No"])
+oldpeak = st.slider("ST Depression (oldpeak)", 0.0, 6.0, 1.0, step=0.1)
+slope = st.selectbox("Slope of Peak Exercise ST Segment (slope)", [0, 1, 2])
+ca = st.selectbox("Number of Major Vessels (ca)", [0, 1, 2, 3, 4])
+thal = st.selectbox("Thalassemia (thal)", [0, 1, 2, 3])
+
+# Prepare input
+user_input = pd.DataFrame([[
     age,
-    bmi,
-    physical_health,
-    mental_health,
-    sleep_time,
-    1 if physical_activity == "Yes" else 0,
-    1 if diff_walking == "Yes" else 0,
-    1 if asthma == "Yes" else 0,
-    1 if kidney == "Yes" else 0,
-    1 if skin_cancer == "Yes" else 0
-]])
+    1 if sex == "Male" else 0,
+    cp,
+    trestbps,
+    chol,
+    1 if fbs == "Yes" else 0,
+    restecg,
+    thalach,
+    1 if exang == "Yes" else 0,
+    oldpeak,
+    slope,
+    ca,
+    thal
+]], columns=['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg',
+             'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal'])
 
-input_scaled = scaler.transform(input_data)
+scaled_input = scaler.transform(user_input)
 
-if st.button("🩺 Check Heart Attack Risk"):
-    prediction = model.predict_proba(input_scaled)[0][1]
-    percentage = round(prediction * 100, 2)
+# Predict
+rf_pred = rf_model.predict_proba(scaled_input)[0][1]
+svm_pred = svm_model.predict_proba(scaled_input)[0][1]
+final_pred = (rf_pred + svm_pred) / 2
 
-    st.subheader("💡 Result")
-    st.success(f"Estimated Heart Attack Risk: **{percentage}%**")
+# Output
+st.subheader("🩺 Estimated Heart Attack Risk:")
+st.metric(label="Risk Percentage", value=f"{final_pred * 100:.2f}%")
 
