@@ -19,18 +19,8 @@ HTML/CSS (if applicable)
 
 🚀 How to Run
 
-git clone https://github.com/yuvi-codes/heart-attack-predictor.git
-cd heart-attack-prediction
-pip install -r requirements.txt
-python app.py  # or: streamlit run app.py
-📁 Files
-app.py – main app
-
-train_model.py – training script
-
-heart.csv – dataset
-
-model/ – saved models
+You can directly access the website: https://heart-attack-predictor-miniprojectyands.streamlit.app 
+This link will redirect you to the website for the Heart Attack Prediction.
 
 ⚠️ Disclaimer
 This tool is for educational purposes only. Not for medical diagnosis.
