@@ -1,44 +1,90 @@
 import streamlit as st
-import joblib
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-# Load model and scaler
-model = joblib.load('heart_attack_model.pkl')
-scaler = joblib.load('scaler.pkl')
+st.set_page_config(page_title="Heart Attack Risk Predictor", layout="centered")
 
-st.title("🫀 Heart Attack Risk Predictor")
-st.subheader("Enter your health info to calculate risk percentage")
+st.title("❤️ Heart Attack Risk Predictor")
+st.write("Enter your health details to estimate the percentage chance of a heart attack.")
 
-# User inputs
-age = st.slider("Age", 18, 100, 45)
-sex = st.selectbox("Sex", ["Male", "Female"])
-diabetes = st.selectbox("Do you have Diabetes?", ["Yes", "No"])
-smoking = st.selectbox("Do you smoke?", ["Yes", "No"])
-alcohol = st.selectbox("Do you drink alcohol regularly?", ["Yes", "No"])
-stroke = st.selectbox("Have you had a stroke?", ["Yes", "No"])
-physical = st.selectbox("Are you physically active?", ["Yes", "No"])
-bmi = st.slider("Body Mass Index (BMI)", 10.0, 50.0, 25.0)
+# Load and preprocess the dataset
+@st.cache_data
+def load_and_train_model():
+    df = pd.read_csv("heart.csv")
 
-# Convert inputs
-def map_input(val, yes_val=1, no_val=0):
-    return yes_val if val == "Yes" or val == "Male" else no_val
+    # Encode categorical features
+    df['Diabetes'] = df['Diabetes'].map({True: 1, False: 0})
+    df['Smoking'] = df['Smoking'].map({True: 1, False: 0})
+    df['AlcoholDrinking'] = df['AlcoholDrinking'].map({True: 1, False: 0})
+    df['Stroke'] = df['Stroke'].map({True: 1, False: 0})
+    df['Sex'] = df['Sex'].map({'Male': 1, 'Female': 0})
+    df['PhysicalActivity'] = df['PhysicalActivity'].map({True: 1, False: 0})
+    df['DiffWalking'] = df['DiffWalking'].map({True: 1, False: 0})
+    df['Asthma'] = df['Asthma'].map({True: 1, False: 0})
+    df['KidneyDisease'] = df['KidneyDisease'].map({True: 1, False: 0})
+    df['SkinCancer'] = df['SkinCancer'].map({True: 1, False: 0})
 
-user_data = np.array([[
+    X = df.drop('HeartDisease', axis=1)
+    y = df['HeartDisease']
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_scaled, y)
+
+    return model, scaler
+
+model, scaler = load_and_train_model()
+
+# Collect user input
+st.header("📝 Your Health Info")
+
+age = st.slider("Age", 18, 100, 30)
+bmi = st.slider("BMI", 10.0, 50.0, 22.0)
+physical_health = st.slider("Physical Health (0–30 days)", 0, 30, 0)
+mental_health = st.slider("Mental Health (0–30 days)", 0, 30, 0)
+sleep_time = st.slider("Average Sleep Time (hrs)", 1, 24, 7)
+
+sex = st.radio("Sex", ["Male", "Female"])
+diabetes = st.radio("Diabetes", ["Yes", "No"])
+smoking = st.radio("Smoking", ["Yes", "No"])
+alcohol = st.radio("Alcohol Drinking", ["Yes", "No"])
+stroke = st.radio("Ever had a Stroke", ["Yes", "No"])
+physical_activity = st.radio("Physically Active", ["Yes", "No"])
+diff_walking = st.radio("Difficulty Walking", ["Yes", "No"])
+asthma = st.radio("Asthma", ["Yes", "No"])
+kidney = st.radio("Kidney Disease", ["Yes", "No"])
+skin_cancer = st.radio("Skin Cancer", ["Yes", "No"])
+
+# Convert inputs to numerical form
+input_data = np.array([[
+    1 if diabetes == "Yes" else 0,
+    1 if smoking == "Yes" else 0,
+    1 if alcohol == "Yes" else 0,
+    1 if stroke == "Yes" else 0,
+    1 if sex == "Male" else 0,
     age,
-    map_input(sex, 1, 0),
     bmi,
-    map_input(diabetes),
-    map_input(smoking),
-    map_input(alcohol),
-    map_input(stroke),
-    map_input(physical)
+    physical_health,
+    mental_health,
+    sleep_time,
+    1 if physical_activity == "Yes" else 0,
+    1 if diff_walking == "Yes" else 0,
+    1 if asthma == "Yes" else 0,
+    1 if kidney == "Yes" else 0,
+    1 if skin_cancer == "Yes" else 0
 ]])
 
-# Scale input
-user_data_scaled = scaler.transform(user_data)
+input_scaled = scaler.transform(input_data)
 
-# Predict
-if st.button("Check Heart Attack Risk"):
-    prediction_proba = model.predict_proba(user_data_scaled)[0][1]
-    percentage = round(prediction_proba * 100, 2)
-    st.success(f"🩺 Your risk of heart attack is: **{percentage}%**")
+if st.button("🩺 Check Heart Attack Risk"):
+    prediction = model.predict_proba(input_scaled)[0][1]
+    percentage = round(prediction * 100, 2)
+
+    st.subheader("💡 Result")
+    st.success(f"Estimated Heart Attack Risk: **{percentage}%**")
+
