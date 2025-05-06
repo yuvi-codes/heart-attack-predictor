@@ -45,7 +45,7 @@ def load_and_train_model():
 model, scaler = load_and_train_model()
 
 # Streamlit UI
-st.title("Heart Attack Risk Predictor 💓 (Ensemble Model)")
+st.title("Heart Attack Risk Predictor 💓 ")
 st.write("This version uses a Voting Classifier combining RandomForest, SVM, and Logistic Regression.")
 
 # Input fields
