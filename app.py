@@ -41,7 +41,7 @@ age = st.slider("Age (15–80)", 15, 80, 45)
 
 sex = st.selectbox("Sex", ["Male", "Female"])
 
-cp = st.selectbox("Chest Pain Type 🔗 [What is Chest Pain Type?](https://www.google.com/search?q=chest+pain+types)", [0, 1, 2, 3])
+cp = st.selectbox("Chest Pain Type 🔗 [What is Chest Pain Type?](https://www.google.com/search?q=chest+pain+types+(0,1,2,3))", [0, 1, 2, 3])
 
 thalach = st.slider("Max Heart Rate Achieved 🔗 [What is Thalach?](https://www.google.com/search?q=thalach+heart+rate)", 60, 202, 150)
 
