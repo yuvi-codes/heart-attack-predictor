@@ -1,9 +1,9 @@
 Heart Attack Prediction
 A simple machine learning project to predict the risk of a heart attack based on medical data.
 
-Features
+Features:
 
-Predicts heart attack risk as a percentage
+~ Predicts heart attack risk as a percentage
 
 ~ Trained with Random Forest, SVM, LogisticRegression and VotingClassifiers
 
