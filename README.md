@@ -15,16 +15,16 @@ Features:
 
 ~ pandas, numpy
 
-Flask or Streamlit
+~ Flask or Streamlit
 
-HTML/CSS (if applicable)
 
-How to Run
+How to Run:
 
 You can directly access the website: https://heart-attack-predictor-miniprojectyands.streamlit.app 
 This link will redirect you to the website for the Heart Attack Prediction.
 
-Disclaimer
+Disclaimer:
+
 This tool is for educational purposes only. Not for medical diagnosis.
 
 
