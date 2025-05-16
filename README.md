@@ -6,9 +6,13 @@ Features
 Predicts heart attack risk as a percentage
 
 ~ Trained with Random Forest, SVM, LogisticRegression and VotingClassifiers
+
 ~ Easy-to-use web interface
+
 ~ Tech Stack
+
 ~ Python, scikit-learn
+
 ~ pandas, numpy
 
 Flask or Streamlit
